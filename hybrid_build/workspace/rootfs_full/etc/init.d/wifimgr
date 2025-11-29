@@ -1,0 +1,17 @@
+#!/bin/sh /etc/rc.common
+# WiFi manager
+
+START=92
+STOP=08
+
+start() {
+    echo "Starting WiFi manager..."
+    /userfs/bin/wifimgr &
+    /userfs/bin/wapp &
+}
+
+stop() {
+    echo "Stopping WiFi manager..."
+    killall wifimgr 2>/dev/null
+    killall wapp 2>/dev/null
+}

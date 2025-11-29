@@ -1,11 +1,76 @@
 # Hybrid Firmware Installation Guide for T626 Pro
 
+## Overview
+
+**Full Port: Stock MediaTek + OpenWrt + LuCI**
+
+This hybrid firmware combines:
+- Stock MediaTek Kernel 4.4.115 (preserved for hardware compatibility)
+- OpenWrt 23.05.5 RootFS with LuCI Web UI
+- All stock binaries, libraries, and tools unlocked
+- GPON/XPON/PON management tools
+- WiFi management tools
+- Stock Boa web interface (port 8080)
+
+## Firmware Structure
+
+```
+Offset      Size        Content
+──────────────────────────────────────────
+0x000       256 B       HDR2 Header (Magic + Version + Model + Chipset)
+0x100       8,404 B     FDT (Device Tree)
+0x21D4      2,651,840 B LZMA Kernel (compressed)
+0x289894    ~22 MB      Squashfs RootFS (Full Port)
+...         padding     0xFF to 32MB
+──────────────────────────────────────────
+Total:      32 MB       (33,554,432 bytes)
+```
+
 ## Firmware Files
 
 | File | Size | Description |
 |------|------|-------------|
-| `hybrid_firmware_ais.bin` | 32 MB | Hybrid firmware with GPON Clone for AIS |
+| `hybrid_firmware_ais.bin` | 32 MB | Full port firmware with all stock functions |
 | `tclinux.bin` | 32 MB | Original stock firmware (backup) |
+
+## What's Included (Full Port)
+
+### Binaries
+| Location | Count | Description |
+|----------|-------|-------------|
+| /bin | 61 | Core utilities |
+| /sbin | 56 | System utilities |
+| /usr/bin | 114 | User tools + stock tools |
+| /usr/sbin | 25 | System daemons |
+| /userfs/bin | 89 | Stock MediaTek tools (GPON/WiFi/etc) |
+
+### Libraries
+| Location | Count | Description |
+|----------|-------|-------------|
+| /lib | 247 | Core + stock libraries |
+| /usr/lib | 38 | Additional libraries |
+
+### Kernel Modules
+- 41 stock kernel modules for GPON/XPON/WiFi/Network
+
+### Key Tools
+- **tcapi** - TrendChip Configuration API
+- **omci/omcicfgCmd** - OMCI management
+- **ponmgr** - PON Manager
+- **gponflowcmd/gponmapcmd** - GPON flow control
+- **xponblapicmd/xponigmpcmd** - XPON tools
+- **wifimgr/wapp/wappctrl** - WiFi management
+- **switchmgr** - Switch management
+- **hw_nat** - Hardware NAT
+- **boa** - Stock web server (port 8080)
+
+### Web Interfaces
+| Interface | Port | Description |
+|-----------|------|-------------|
+| LuCI | 80 | OpenWrt Web UI |
+| Boa | 8080 | Stock Web UI |
+
+---
 
 ## MTD Partition Layout
 
@@ -55,21 +120,6 @@ mtd write /tmp/hybrid_firmware_ais.bin tclinux
 reboot
 ```
 
-### Alternative: Flash kernel and rootfs separately
-
-```bash
-# Extract kernel (first 2.6MB)
-dd if=/tmp/hybrid_firmware_ais.bin of=/tmp/kernel.bin bs=1024 count=2660
-
-# Extract rootfs (remaining)
-dd if=/tmp/hybrid_firmware_ais.bin of=/tmp/rootfs.bin bs=1024 skip=2660
-
-# Flash separately
-mtd write /tmp/kernel.bin kernel
-mtd write /tmp/rootfs.bin rootfs
-reboot
-```
-
 ---
 
 ## Method 3: Flash via dd (Advanced)
@@ -77,60 +127,25 @@ reboot
 ### WARNING: Using dd incorrectly can brick your device!
 
 ```bash
-# 1. Transfer firmware to router
-scp hybrid_firmware_ais.bin root@192.168.1.1:/tmp/
-
-# 2. SSH into router
-ssh root@192.168.1.1
-
-# 3. Check current MTD devices
-cat /proc/mtd
-
-# 4. Backup current firmware FIRST!
+# 1. Backup current firmware FIRST!
 dd if=/dev/mtd4 of=/tmp/backup_tclinux.bin
-# Transfer backup to PC via scp
 
-# 5. Flash new firmware
+# 2. Flash new firmware
 dd if=/tmp/hybrid_firmware_ais.bin of=/dev/mtd4
 
-# 6. Sync and reboot
-sync
-reboot
-```
-
-### Flash to specific partitions with dd
-
-```bash
-# Flash kernel only (mtd2)
-dd if=/tmp/hybrid_firmware_ais.bin of=/dev/mtd2 bs=1024 count=2660
-
-# Flash rootfs only (mtd3)
-dd if=/tmp/hybrid_firmware_ais.bin of=/dev/mtd3 bs=1024 skip=2660
-
+# 3. Sync and reboot
 sync
 reboot
 ```
 
 ---
 
-## Method 4: Flash via tcapi (TrendChip API)
+## Method 4: Flash via tcapi
 
 ```bash
-# 1. Transfer firmware
-scp hybrid_firmware_ais.bin root@192.168.1.1:/tmp/
-
-# 2. SSH into router
-ssh root@192.168.1.1
-
-# 3. Use tcapi to flash
 tcapi set SysInfo_Entry FwUpgrade /tmp/hybrid_firmware_ais.bin
 tcapi commit SysInfo_Entry
 tcapi save
-
-# 4. Or use fwupgrade command if available
-fwupgrade /tmp/hybrid_firmware_ais.bin
-
-# 5. Reboot
 reboot
 ```
 
@@ -138,93 +153,94 @@ reboot
 
 ## Method 5: Recovery via TFTP (If bricked)
 
-### Requirements
-- TFTP server on PC (IP: 192.168.1.100)
-- Ethernet cable connected to LAN port 1
-- Firmware renamed to specific filename
-
-### Steps
-
 1. Set PC IP to `192.168.1.100`
-2. Start TFTP server with firmware file
-3. Rename firmware: `mv hybrid_firmware_ais.bin tclinux.bin`
+2. Start TFTP server with firmware
+3. Rename: `mv hybrid_firmware_ais.bin tclinux.bin`
 4. Power off router
 5. Hold **RESET** button
 6. Power on while holding RESET
-7. Wait for router to download firmware via TFTP
-8. Release RESET after ~30 seconds
-9. Wait for reboot
+7. Wait for TFTP download (~30 seconds)
+8. Release RESET and wait for reboot
 
 ---
 
-## Post-Installation: GPON Clone Setup
+## Post-Installation
 
-After successful flash, configure GPON for AIS:
+### Access Web Interfaces
+
+| Interface | URL | Login |
+|-----------|-----|-------|
+| LuCI (OpenWrt) | http://192.168.1.1 | root / (blank) |
+| Stock Boa | http://192.168.1.1:8080 | admin / admin |
+
+### SSH Access
 
 ```bash
-# SSH into router
 ssh root@192.168.1.1
-
-# View current GPON settings
-gpon_clone -c
-
-# Clone AIS credentials
-gpon_clone -s ZTEGC1234567 -l 1234567890 -m AA:BB:CC:DD:EE:FF
-
-# Clone with auto-restart PON interface
-gpon_clone -s ZTEGC1234567 -l 1234567890 -R
-
-# Apply settings permanently
-cp /etc/gpon_clone.conf.example /etc/gpon_clone.conf
-# Edit with your actual values
-vi /etc/gpon_clone.conf
+# Password: (blank by default)
 ```
 
-### GPON Clone Options
+### Using Stock Tools
+
+```bash
+# tcapi - Configuration API
+tcapi get GPON_ONU GPON_SN
+tcapi set GPON_ONU GPON_SN "ZTEGC1234567"
+tcapi commit GPON_ONU
+tcapi save
+
+# ponmgr - PON Manager
+ponmgr_cfg status
+
+# omci - OMCI Management
+omcicfgCmd read
+
+# WiFi Management
+wifimgr
+wapp
+iwconfig ra0
+```
+
+### GPON Clone for AIS
+
+```bash
+# View current settings
+gpon_clone -r
+
+# Clone GPON credentials
+gpon_clone -s ZTEGC1234567 -l 1234567890 -m AA:BB:CC:DD:EE:FF -R
+```
+
+#### GPON Clone Options
 
 | Option | Description | Example |
 |--------|-------------|---------|
-| `-s, --sn` | GPON Serial Number | `ZTEGC1234567` |
-| `-l, --loid` | LOID (Logical ONU ID) | `1234567890` |
-| `-p, --password` | LOID Password | `password123` |
-| `-m, --mac` | PON MAC Address | `AA:BB:CC:DD:EE:FF` |
-| `-v, --vendor` | Vendor ID | `ZTEG` |
-| `-e, --equipment` | Equipment ID | `ZXHN_F670L` |
-| `-c, --current` | Show current settings | - |
-| `-b, --backup` | Backup current settings | - |
-| `-r, --restore` | Restore from backup | - |
-| `-R, --restart` | Restart PON after changes | - |
+| `-s` | GPON Serial Number | `ZTEGC1234567` |
+| `-l` | LOID/PLOAM Password | `1234567890` |
+| `-m` | WAN MAC Address | `AA:BB:CC:DD:EE:FF` |
+| `-r` | Read current settings | - |
+| `-R` | Reboot after changes | - |
 
 ---
 
 ## Troubleshooting
 
-### Router not booting after flash
-1. Try TFTP recovery method
-2. Use serial console to access bootloader
-3. Restore original `tclinux.bin` backup
-
-### GPON not connecting
-1. Check PON light status (should be solid green)
-2. Verify GPON SN matches ISP records
-3. Check LOID is correct
-4. Try restarting PON: `gpon_clone -R`
-
-### SSH not working
-1. Default IP: `192.168.1.1`
-2. Default user: `root`
-3. Check firewall settings
-
-### Check GPON status
+### Check Module Status
 ```bash
-# View PON status
+lsmod | grep -E 'xpon|gpon|pon|wifi|mt79'
+```
+
+### Check PON Status
+```bash
 cat /proc/tc3162/pon_status
-
-# View OMCI status
 cat /proc/tc3162/omci_status
+```
 
-# Check kernel modules
-lsmod | grep -E 'xpon|gpon|pon'
+### Restart Services
+```bash
+/etc/init.d/stock_services restart
+/etc/init.d/ponmgr restart
+/etc/init.d/wifimgr restart
 ```
 
 ---
@@ -235,7 +251,7 @@ lsmod | grep -E 'xpon|gpon|pon'
 2. **DO NOT** flash via wireless - use wired connection only
 3. **DO NOT** power off during flash process
 4. Keep original `tclinux.bin` for recovery
-5. AIS default parameters are pre-configured (Vendor: ZTEG, Equipment: ZXHN_F670L)
+5. LuCI runs on port 80, Stock Boa on port 8080
 
 ---
 
@@ -244,8 +260,11 @@ lsmod | grep -E 'xpon|gpon|pon'
 ```bash
 # Verify firmware integrity before flashing
 md5sum hybrid_firmware_ais.bin
-# Expected: 681f6aa2851c32aca9d74e1c041a48cf
+# Expected: cc14795fcc0a239b8c47fa22588c94bd
 
 sha256sum hybrid_firmware_ais.bin
-# Expected: b6d5cf163ffee693ce1f1c761d13bb700ca32931b1d38cdc2d0118e635ceea6a
+# Expected: 0c23ebd59ce50ed6f11d932d14a45572e418a04dd2bdff4bea6aa5c62963f9e7
+
+# File size must be exactly 32MB (33554432 bytes)
+ls -la hybrid_firmware_ais.bin
 ```

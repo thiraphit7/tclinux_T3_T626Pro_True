@@ -1,0 +1,1 @@
+export const revision = 'git-25.222.75657-7ce34fe', branch = 'LuCI openwrt-23.05 branch';

@@ -1,0 +1,16 @@
+#!/bin/sh /etc/rc.common
+# Stock Boa web server
+
+START=95
+STOP=05
+
+start() {
+    echo "Starting Boa web server..."
+    mkdir -p /tmp/boa
+    /userfs/bin/boa -c /boaroot &
+}
+
+stop() {
+    echo "Stopping Boa web server..."
+    killall boa 2>/dev/null
+}
