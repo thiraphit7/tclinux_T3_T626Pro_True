@@ -1,0 +1,12 @@
+Package: kmod-fs-vfat
+Version: 5.15.167-1
+Depends: kernel (=5.15.167-1-b6fa2002ee7aad946166a76ce2e129c3), kmod-nls-base, kmod-nls-cp437, kmod-nls-iso8859-1, kmod-nls-utf8
+Source: feeds/base/kernel/linux
+SourceName: kmod-fs-vfat
+License: GPL-2.0-only
+LicenseFiles: COPYING
+Section: kernel
+SourceDateEpoch: 1726325473
+Architecture: arm_cortex-a15_neon-vfpv4
+Installed-Size: 44732
+Description:  Kernel module for VFAT filesystem support

@@ -1,0 +1,39 @@
+#
+# GPON Clone Configuration for AIS Fiber
+# Copy this file to /etc/gpon_clone.conf and edit values
+#
+# For T626 Pro Hybrid Firmware
+#
+
+# GPON Serial Number (12-16 characters)
+# Format: VENDOR_ID (4 chars) + Serial (8-12 chars)
+# Example: ZTEGC1234567
+GPON_SN="ZTEGC1234567"
+
+# Logical ONU ID (LOID)
+# This is provided by AIS when registering ONT
+LOID="1234567890"
+
+# LOID Password (if required by OLT)
+LOID_PASSWORD=""
+
+# PON MAC Address
+# Format: AA:BB:CC:DD:EE:FF
+PON_MAC="AA:BB:CC:DD:EE:FF"
+
+# Vendor ID (4 characters)
+# Common values: ZTEG, HWTC, ALCL, GPON
+VENDOR_ID="ZTEG"
+
+# Equipment ID / Model Name
+# Should match the model expected by AIS OLT
+EQUIPMENT_ID="ZXHN_F670L"
+
+# OMCC Version (hex)
+OMCC_VERSION="0xA3"
+
+# Hardware Version (optional)
+HW_VERSION="V1.0"
+
+# Software Version (optional)
+SW_VERSION="V1.1.1"

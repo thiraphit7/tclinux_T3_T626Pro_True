@@ -1,0 +1,47 @@
+#!/bin/sh /etc/rc.common
+# Stock MediaTek services init script
+
+START=90
+STOP=10
+
+start() {
+    echo "Loading stock kernel modules..."
+    
+    # Load core modules
+    insmod /lib/modules/4.4.115/nlk_msg.ko 2>/dev/null
+    insmod /lib/modules/4.4.115/tccicmd.ko 2>/dev/null
+    insmod /lib/modules/4.4.115/sif.ko 2>/dev/null
+    insmod /lib/modules/4.4.115/ifc.ko 2>/dev/null
+    insmod /lib/modules/4.4.115/npu.ko 2>/dev/null
+    
+    # Load network modules
+    insmod /lib/modules/4.4.115/fe_core.ko 2>/dev/null
+    insmod /lib/modules/4.4.115/eth.ko 2>/dev/null
+    insmod /lib/modules/4.4.115/eth_ephy.ko 2>/dev/null
+    insmod /lib/modules/4.4.115/qdma_lan.ko 2>/dev/null
+    insmod /lib/modules/4.4.115/qdma_wan.ko 2>/dev/null
+    insmod /lib/modules/4.4.115/hw_nat.ko 2>/dev/null
+    
+    # Load GPON/XPON modules
+    insmod /lib/modules/4.4.115/xpon.ko 2>/dev/null
+    insmod /lib/modules/4.4.115/xpon_int.ko 2>/dev/null
+    insmod /lib/modules/4.4.115/xpon_igmp.ko 2>/dev/null
+    insmod /lib/modules/4.4.115/xponmap.ko 2>/dev/null
+    insmod /lib/modules/4.4.115/gpon_flow.ko 2>/dev/null
+    insmod /lib/modules/4.4.115/ponvlan.ko 2>/dev/null
+    insmod /lib/modules/4.4.115/ponmacfilter.ko 2>/dev/null
+    
+    # Load WiFi modules
+    insmod /lib/modules/4.4.115/mt7916_ap.ko 2>/dev/null
+    insmod /lib/modules/4.4.115/mt_whnat.ko 2>/dev/null
+    
+    # Load other modules
+    insmod /lib/modules/4.4.115/tcledctrl.ko 2>/dev/null
+    insmod /lib/modules/4.4.115/thermal.ko 2>/dev/null
+    
+    echo "Stock modules loaded"
+}
+
+stop() {
+    echo "Unloading stock modules..."
+}

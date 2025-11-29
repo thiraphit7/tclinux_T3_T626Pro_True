@@ -1,0 +1,12 @@
+# Put your custom commands here that should be executed once
+# the system init finished. By default this file does nothing.
+
+# Load GPON/XPON modules for fiber connectivity
+/etc/init.d/load_gpon_modules.sh
+
+# Apply GPON Clone settings if configured
+if [ -f /etc/gpon_clone.conf ]; then
+    /etc/init.d/gpon_clone start
+fi
+
+exit 0

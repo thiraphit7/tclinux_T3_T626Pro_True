@@ -1,0 +1,12 @@
+Package: kmod-pppoe
+Version: 5.15.167-1
+Depends: kernel (=5.15.167-1-b6fa2002ee7aad946166a76ce2e129c3), kmod-ppp, kmod-pppox
+Source: feeds/base/kernel/linux
+SourceName: kmod-pppoe
+License: GPL-2.0-only
+LicenseFiles: COPYING
+Section: kernel
+SourceDateEpoch: 1726325473
+Architecture: arm_cortex-a15_neon-vfpv4
+Installed-Size: 7721
+Description:  Kernel module for PPPoE (PPP over Ethernet) support

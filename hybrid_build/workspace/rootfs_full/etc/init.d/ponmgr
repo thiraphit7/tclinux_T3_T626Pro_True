@@ -1,0 +1,15 @@
+#!/bin/sh /etc/rc.common
+# GPON/XPON manager
+
+START=91
+STOP=09
+
+start() {
+    echo "Starting PON manager..."
+    /userfs/bin/ponmgr &
+}
+
+stop() {
+    echo "Stopping PON manager..."
+    killall ponmgr 2>/dev/null
+}

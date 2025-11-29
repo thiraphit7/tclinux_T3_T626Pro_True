@@ -1,0 +1,17 @@
+#!/bin/sh
+# Stock MediaTek services startup
+
+# Setup /tmp directories
+mkdir -p /tmp/etc /tmp/var /tmp/log /tmp/run
+
+# Enable services
+/etc/init.d/stock_services start
+/etc/init.d/ponmgr start
+/etc/init.d/wifimgr start
+
+# Start stock web interface (boa) on port 8080
+# LuCI runs on port 80
+sed -i 's/Port 80/Port 8080/' /boaroot/boa.conf 2>/dev/null
+/etc/init.d/boa start
+
+exit 0

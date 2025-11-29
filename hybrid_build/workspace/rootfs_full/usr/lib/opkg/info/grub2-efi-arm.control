@@ -1,0 +1,12 @@
+Package: grub2-efi-arm
+Version: 2.06-5
+Depends: libc
+Source: feeds/base/boot/grub2
+SourceName: grub2-efi-arm
+License: GPL-3.0-or-later
+Section: boot
+SourceDateEpoch: 1686658471
+CPE-ID: cpe:/a:gnu:grub2
+Architecture: arm_cortex-a15_neon-vfpv4
+Installed-Size: 96
+Description:  GRand Unified Bootloader (efi)

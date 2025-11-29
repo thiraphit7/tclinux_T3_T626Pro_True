@@ -1,0 +1,129 @@
+#!/bin/sh
+# GPON Clone Tool for AIS Fiber
+# Clone GPON SN, LOID, and MAC Address
+
+GPON_SN=""
+LOID=""
+MAC_ADDR=""
+REBOOT=0
+
+usage() {
+    echo "GPON Clone Tool for AIS Fiber"
+    echo ""
+    echo "Usage: $0 [OPTIONS]"
+    echo ""
+    echo "Options:"
+    echo "  -s SN      Set GPON Serial Number (e.g., ZTEGC1234567)"
+    echo "  -l LOID    Set LOID/PLOAM Password (e.g., 1234567890)"
+    echo "  -m MAC     Set WAN MAC Address (e.g., AA:BB:CC:DD:EE:FF)"
+    echo "  -R         Reboot after applying changes"
+    echo "  -r         Read current GPON settings"
+    echo "  -h         Show this help"
+    echo ""
+    echo "Examples:"
+    echo "  $0 -s ZTEGC1234567 -l 1234567890 -R"
+    echo "  $0 -m AA:BB:CC:DD:EE:FF"
+    echo "  $0 -r"
+}
+
+read_settings() {
+    echo "=== Current GPON Settings ==="
+    echo ""
+    
+    # Try tcapi first
+    if [ -x /userfs/bin/tcapi ]; then
+        echo "GPON Serial Number:"
+        /userfs/bin/tcapi get GPON_ONU GPON_SN 2>/dev/null || echo "  (not set)"
+        
+        echo "LOID:"
+        /userfs/bin/tcapi get GPON_ONU LOID 2>/dev/null || echo "  (not set)"
+        
+        echo "PLOAM Password:"
+        /userfs/bin/tcapi get GPON_ONU PLOAM_Password 2>/dev/null || echo "  (not set)"
+        
+        echo "WAN MAC:"
+        /userfs/bin/tcapi get Info_WanMac MAC 2>/dev/null || echo "  (not set)"
+    fi
+    
+    # Try omcicfgCmd
+    if [ -x /userfs/bin/omcicfgCmd ]; then
+        echo ""
+        echo "=== OMCI Settings ==="
+        /userfs/bin/omcicfgCmd read 2>/dev/null | head -20
+    fi
+    
+    # Try ponmgr
+    if [ -x /userfs/bin/ponmgr ]; then
+        echo ""
+        echo "=== PON Manager Status ==="
+        /userfs/bin/ponmgr_cfg status 2>/dev/null | head -10
+    fi
+}
+
+apply_settings() {
+    echo "Applying GPON settings..."
+    
+    if [ -n "$GPON_SN" ]; then
+        echo "Setting GPON SN: $GPON_SN"
+        if [ -x /userfs/bin/tcapi ]; then
+            /userfs/bin/tcapi set GPON_ONU GPON_SN "$GPON_SN"
+        fi
+        if [ -x /userfs/bin/omcicfgCmd ]; then
+            /userfs/bin/omcicfgCmd write gpon_sn "$GPON_SN" 2>/dev/null
+        fi
+    fi
+    
+    if [ -n "$LOID" ]; then
+        echo "Setting LOID: $LOID"
+        if [ -x /userfs/bin/tcapi ]; then
+            /userfs/bin/tcapi set GPON_ONU LOID "$LOID"
+            /userfs/bin/tcapi set GPON_ONU PLOAM_Password "$LOID"
+        fi
+        if [ -x /userfs/bin/omcicfgCmd ]; then
+            /userfs/bin/omcicfgCmd write loid "$LOID" 2>/dev/null
+            /userfs/bin/omcicfgCmd write ploam_pwd "$LOID" 2>/dev/null
+        fi
+    fi
+    
+    if [ -n "$MAC_ADDR" ]; then
+        echo "Setting WAN MAC: $MAC_ADDR"
+        if [ -x /userfs/bin/tcapi ]; then
+            /userfs/bin/tcapi set Info_WanMac MAC "$MAC_ADDR"
+        fi
+    fi
+    
+    # Commit changes
+    if [ -x /userfs/bin/tcapi ]; then
+        /userfs/bin/tcapi commit GPON_ONU 2>/dev/null
+        /userfs/bin/tcapi commit Info_WanMac 2>/dev/null
+        /userfs/bin/tcapi save 2>/dev/null
+    fi
+    
+    echo "Settings applied!"
+    
+    if [ "$REBOOT" = "1" ]; then
+        echo "Rebooting in 3 seconds..."
+        sleep 3
+        reboot
+    fi
+}
+
+# Parse arguments
+while getopts "s:l:m:Rrh" opt; do
+    case $opt in
+        s) GPON_SN="$OPTARG" ;;
+        l) LOID="$OPTARG" ;;
+        m) MAC_ADDR="$OPTARG" ;;
+        R) REBOOT=1 ;;
+        r) read_settings; exit 0 ;;
+        h) usage; exit 0 ;;
+        *) usage; exit 1 ;;
+    esac
+done
+
+if [ -z "$GPON_SN" ] && [ -z "$LOID" ] && [ -z "$MAC_ADDR" ]; then
+    usage
+    exit 1
+fi
+
+apply_settings
