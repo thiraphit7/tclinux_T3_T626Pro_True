@@ -115,9 +115,30 @@ inject_stock_components() {
     cp "${BUILD_DIR}/scripts/load_gpon_modules.sh" "${ROOTFS}/etc/init.d/"
     chmod +x "${ROOTFS}/etc/init.d/load_gpon_modules.sh"
 
+    # Inject GPON Clone scripts for AIS
+    log "  - Installing GPON Clone scripts for AIS..."
+    cp "${BUILD_DIR}/scripts/gpon_clone_ais.sh" "${ROOTFS}/usr/bin/gpon_clone"
+    chmod +x "${ROOTFS}/usr/bin/gpon_clone"
+
+    cp "${BUILD_DIR}/scripts/gpon_clone_init.sh" "${ROOTFS}/etc/init.d/gpon_clone"
+    chmod +x "${ROOTFS}/etc/init.d/gpon_clone"
+
+    # Copy GPON clone config example
+    cp "${BUILD_DIR}/configs/gpon_clone.conf.example" "${ROOTFS}/etc/gpon_clone.conf.example"
+
+    # Install LuCI GPON Clone interface (if LuCI exists)
+    if [ -d "${ROOTFS}/usr/lib/lua/luci" ]; then
+        log "  - Installing LuCI GPON Clone interface..."
+        mkdir -p "${ROOTFS}/usr/lib/lua/luci/controller"
+        mkdir -p "${ROOTFS}/usr/lib/lua/luci/model/cbi"
+        cp "${BUILD_DIR}/luci/luasrc/controller/gpon_clone.lua" "${ROOTFS}/usr/lib/lua/luci/controller/"
+        cp "${BUILD_DIR}/luci/luasrc/model/cbi/gpon_clone.lua" "${ROOTFS}/usr/lib/lua/luci/model/cbi/"
+    fi
+
     # Create auto-start symlink
     mkdir -p "${ROOTFS}/etc/rc.d"
     ln -sf ../init.d/load_gpon_modules.sh "${ROOTFS}/etc/rc.d/S99gpon"
+    ln -sf ../init.d/gpon_clone "${ROOTFS}/etc/rc.d/S98gpon_clone"
 
     # Add to rc.local
     cat >> "${ROOTFS}/etc/rc.local" << 'EOF'
@@ -125,10 +146,16 @@ inject_stock_components() {
 # Load GPON/XPON modules for fiber connectivity
 /etc/init.d/load_gpon_modules.sh
 
+# Apply GPON Clone settings if configured
+if [ -f /etc/gpon_clone.conf ]; then
+    /etc/init.d/gpon_clone start
+fi
+
 exit 0
 EOF
 
     log "Stock components injected"
+    log "GPON Clone for AIS installed"
 }
 
 # Create squashfs

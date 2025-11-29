@@ -1,0 +1,8 @@
+https://downloads.openwrt.org/snapshots/targets/armsr/armv7/packages/packages.adb
+https://downloads.openwrt.org/snapshots/packages/arm_cortex-a15_neon-vfpv4/base/packages.adb
+https://downloads.openwrt.org/snapshots/targets/armsr/armv7/kmods/6.12.59-1-c82bb5814fc9f4efa7f83c47e67c4877/packages.adb
+https://downloads.openwrt.org/snapshots/packages/arm_cortex-a15_neon-vfpv4/luci/packages.adb
+https://downloads.openwrt.org/snapshots/packages/arm_cortex-a15_neon-vfpv4/packages/packages.adb
+https://downloads.openwrt.org/snapshots/packages/arm_cortex-a15_neon-vfpv4/routing/packages.adb
+https://downloads.openwrt.org/snapshots/packages/arm_cortex-a15_neon-vfpv4/telephony/packages.adb
+https://downloads.openwrt.org/snapshots/packages/arm_cortex-a15_neon-vfpv4/video/packages.adb
