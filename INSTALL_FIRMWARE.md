@@ -244,8 +244,8 @@ lsmod | grep -E 'xpon|gpon|pon'
 ```bash
 # Verify firmware integrity before flashing
 md5sum hybrid_firmware_ais.bin
-# Expected: ffa7661092f0a007c955054e03cd402e
+# Expected: 681f6aa2851c32aca9d74e1c041a48cf
 
 sha256sum hybrid_firmware_ais.bin
-# Expected: a596b541b9c755e5bf91aa7e7db57b17933663c2c86e28554d8bad03667f52e5
+# Expected: b6d5cf163ffee693ce1f1c761d13bb700ca32931b1d38cdc2d0118e635ceea6a
 ```
