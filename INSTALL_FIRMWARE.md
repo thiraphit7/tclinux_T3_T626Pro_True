@@ -4,7 +4,7 @@
 
 | File | Size | Description |
 |------|------|-------------|
-| `hybrid_firmware_ais.bin` | 13.8 MB | Hybrid firmware with GPON Clone for AIS |
+| `hybrid_firmware_ais.bin` | 32 MB | Hybrid firmware with GPON Clone for AIS |
 | `tclinux.bin` | 32 MB | Original stock firmware (backup) |
 
 ## MTD Partition Layout
@@ -244,8 +244,8 @@ lsmod | grep -E 'xpon|gpon|pon'
 ```bash
 # Verify firmware integrity before flashing
 md5sum hybrid_firmware_ais.bin
-# Expected: 7400efca04ef065fce8849de5b01ab42
+# Expected: ffa7661092f0a007c955054e03cd402e
 
 sha256sum hybrid_firmware_ais.bin
-# Expected: c053272a0bbf8c509de6903c82b9cd314cff351cde7e0f78162420b0099ff270
+# Expected: a596b541b9c755e5bf91aa7e7db57b17933663c2c86e28554d8bad03667f52e5
 ```
