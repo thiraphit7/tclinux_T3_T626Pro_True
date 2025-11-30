@@ -7,6 +7,7 @@
 | Model | HG8145B7N-AIS |
 | GPON SN (hex) | 48575443286F3DB5 |
 | GPON SN (decoded) | HWTC286F3DB5 |
+| **LOID** | **8806480495** |
 | Vendor ID | HWTC (Huawei) |
 | MAC Address | E0:AE:A2:EF:B1:CD |
 | Hardware Version | 39E7.A |
@@ -39,9 +40,9 @@ tcapi set Info_GPON VendorID "HWTC"
 tcapi set GPON_Common EquipmentID "HG8145B7N"
 tcapi set Info_GPON EquipmentID "HG8145B7N"
 
-# 6. ตั้งค่า LOID (ถ้ามี - ได้จาก AIS)
-# tcapi set GPON_Common LOID "YOUR_LOID_HERE"
-# tcapi set GPON_Common LOIDPassword "YOUR_PASSWORD"
+# 6. ตั้งค่า LOID
+tcapi set GPON_Common LOID "8806480495"
+tcapi set Info_GPON LOID "8806480495"
 
 # 7. บันทึกการเปลี่ยนแปลง
 tcapi commit GPON_Common
@@ -66,6 +67,7 @@ cat /proc/tc3162/pon_status
 ```bash
 # Clone ทั้งหมดพร้อม restart
 gpon_clone -s HWTC286F3DB5 \
+           -l 8806480495 \
            -m E0:AE:A2:EF:B1:CD \
            -v HWTC \
            -e HG8145B7N \
@@ -106,6 +108,10 @@ echo "=== Cloning HG8145B7N GPON Profile ==="
 # Set GPON SN
 tcapi set GPON_Common GPON_SN "HWTC286F3DB5"
 echo "[OK] GPON_SN = HWTC286F3DB5"
+
+# Set LOID
+tcapi set GPON_Common LOID "8806480495"
+echo "[OK] LOID = 8806480495"
 
 # Set MAC
 tcapi set GPON_Common PON_MAC "E0:AE:A2:EF:B1:CD"
@@ -172,11 +178,7 @@ tcapi get GPON_Common ONUState
 
 ## หมายเหตุสำคัญ
 
-1. **LOID**: ถ้า AIS ใช้ LOID สำหรับ authentication จะต้องใส่ค่า LOID ด้วย
-   ```bash
-   tcapi set GPON_Common LOID "YOUR_LOID"
-   tcapi set GPON_Common LOIDPassword "YOUR_PASSWORD"
-   ```
+1. **LOID**: ค่า LOID ที่ใช้คือ `8806480495`
 
 2. **SN Format**:
    - Hex: `48575443286F3DB5`
