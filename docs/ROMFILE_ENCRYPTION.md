@@ -97,6 +97,33 @@ To reverse engineer:
 2. Find the `default_MAC_AES_encrypt` function
 3. Trace key derivation logic
 
+## Deep Analysis Results
+
+### Key Derivation Logic (from library at 0x009442)
+
+```
+sys_get_mac           <- Get MAC address
+Base64_encode         <- Base64 encoding
+MD52PWD               <- MD5 to password conversion
+default_MAC_AES_encrypt <- Final AES encryption
+```
+
+### Encoding Process
+
+Based on `update_DecodeRomfile` and `Base64_decode failed` strings:
+
+1. Plaintext XML romfile
+2. AES-ECB encryption (MAC-derived key)
+3. Storage as binary ciphertext
+
+### Repeated Block Analysis (ECB Fingerprint)
+
+| Block (hex) | Count |
+|-------------|-------|
+| c5cf5aec4f4b5a644f4b5a64e3c35ac0 | 303 |
+| 4fc35a64e3c35ac04f4b5a644f4b5a64 | 301 |
+| 4f4bd0e04fc35a64e3c35ac04f4b5a64 | 300 |
+
 ## Scripts Created
 
 | Script | Purpose |
@@ -106,6 +133,10 @@ To reverse engineer:
 | `scripts/crack_romfile.py` | XOR key finding |
 | `scripts/crack_romfile_v2.py` | Known-plaintext attack |
 | `scripts/ecb_analysis.py` | ECB block analysis |
+| `scripts/analyze_library.py` | Library binary analysis |
+| `scripts/derive_key.py` | MAC-based key derivation |
+| `scripts/deep_analyze.py` | Deep binary analysis |
+| `scripts/base64_decode.py` | Base64 decoding attempts |
 
 ## Workaround: Use Web UI Restore
 
