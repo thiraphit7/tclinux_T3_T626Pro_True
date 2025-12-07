@@ -216,6 +216,76 @@ tcapi set GPON_ONU VendorId "HWTC" && tcapi set GPON_ONU SerialNumber "HWTC286F3
 ```
 
 -----
+# คำสั่ง tcapi พร้อม commit ทั้งหมด
+
+```bash
+# ===== GPON ONU Identity =====
+tcapi set GPON_ONU VendorId "HWTC"
+tcapi set GPON_ONU SerialNumber "HWTC286F3DB5"
+tcapi set GPON_ONU EquipmentId "HG8145B7N"
+tcapi set GPON_ONU OMCCVersion "160"
+tcapi commit GPON_ONU
+
+# ===== LOID =====
+tcapi set GPON_LOIDAuth LOID "8806480495"
+tcapi commit GPON_LOIDAuth
+
+# ===== OLT Vendor =====
+tcapi set GPON_OLT VendorId "HWTC"
+tcapi commit GPON_OLT
+
+# ===== MAC Address =====
+tcapi set Mac WAN_MAC "E0:AE:A2:EF:B1:CD"
+tcapi commit Mac
+tcapi set mapcfg AL-MAC "e0:ae:a2:ef:b1:cd"
+tcapi commit mapcfg
+
+# ===== Telnet Enable =====
+tcapi set Firewall wan_telnet_enable "1"
+tcapi commit Firewall
+tcapi set TelnetEntry Active "Yes"
+tcapi set TelnetEntry telnet_username "admin"
+tcapi set TelnetEntry telnet_passwd "16122516"
+tcapi set TelnetEntry telnet_port "23"
+tcapi commit TelnetEntry
+
+# ===== Superadmin Password =====
+tcapi set Account0 web_passwd "16122516"
+tcapi set Account0 Password "16122516"
+tcapi commit Account0
+
+# ===== Disable TR069 =====
+tcapi set Cwmp Tr069Enable "0"
+tcapi set Cwmp periodActive "No"
+tcapi set Cwmp Active "No"
+tcapi commit Cwmp
+
+# ===== Save & Reboot =====
+tcapi save
+reboot
+```
+
+-----
+
+## One-liner พร้อม commit
+
+```bash
+tcapi set GPON_ONU VendorId "HWTC" && tcapi set GPON_ONU SerialNumber "HWTC286F3DB5" && tcapi set GPON_ONU EquipmentId "HG8145B7N" && tcapi set GPON_ONU OMCCVersion "160" && tcapi commit GPON_ONU && tcapi set GPON_LOIDAuth LOID "8806480495" && tcapi commit GPON_LOIDAuth && tcapi set GPON_OLT VendorId "HWTC" && tcapi commit GPON_OLT && tcapi set Mac WAN_MAC "E0:AE:A2:EF:B1:CD" && tcapi commit Mac && tcapi set Firewall wan_telnet_enable "1" && tcapi commit Firewall && tcapi set TelnetEntry Active "Yes" && tcapi set TelnetEntry telnet_username "admin" && tcapi set TelnetEntry telnet_passwd "16122516" && tcapi set TelnetEntry telnet_port "23" && tcapi commit TelnetEntry && tcapi set Cwmp Tr069Enable "0" && tcapi set Cwmp periodActive "No" && tcapi set Cwmp Active "No" && tcapi commit Cwmp && tcapi save && reboot
+```
+
+-----
+
+## ตรวจสอบค่าหลัง commit
+
+```bash
+tcapi get GPON_ONU
+tcapi get GPON_LOIDAuth
+tcapi get GPON_OLT
+tcapi get TelnetEntry
+tcapi get Cwmp
+```
+
+-----
 
 ลองรันแล้วบอกผลด้วยครับ! 🤞​​​​​​​​​​​​​​​​
 
