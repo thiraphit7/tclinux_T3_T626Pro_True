@@ -151,5 +151,71 @@ prolinecmd GponRegId get
 
 -----
 
-ลองตั้งค่าตามนี้แล้วบอกผลด้วยครับ! 🤞​​​​​​​​​​​​​​​​
+# คำสั่ง tcapi ทั้งหมด
+
+```bash
+# ===== GPON ONU Identity =====
+tcapi set GPON_ONU VendorId "HWTC"
+tcapi set GPON_ONU SerialNumber "HWTC286F3DB5"
+tcapi set GPON_ONU EquipmentId "HG8145B7N"
+tcapi set GPON_ONU OMCCVersion "160"
+
+# ===== LOID =====
+tcapi set GPON_LOIDAuth LOID "8806480495"
+
+# ===== OLT Vendor =====
+tcapi set GPON_OLT VendorId "HWTC"
+
+# ===== MAC Address =====
+tcapi set Mac WAN_MAC "E0:AE:A2:EF:B1:CD"
+tcapi set mapcfg AL-MAC "e0:ae:a2:ef:b1:cd"
+
+# ===== Telnet Enable =====
+tcapi set Firewall wan_telnet_enable "1"
+tcapi set TelnetEntry Active "Yes"
+tcapi set TelnetEntry telnet_username "admin"
+tcapi set TelnetEntry telnet_passwd "16122516"
+tcapi set TelnetEntry telnet_port "23"
+
+# ===== Superadmin Password =====
+tcapi set Account0 web_passwd "16122516"
+tcapi set Account0 Password "16122516"
+
+# ===== Disable TR069 =====
+tcapi set Cwmp Tr069Enable "0"
+tcapi set Cwmp periodActive "No"
+tcapi set Cwmp Active "No"
+
+# ===== Save & Reboot =====
+tcapi save
+reboot
+```
+
+-----
+
+## สรุป
+
+|Parameter   |คำสั่ง tcapi                                       |
+|------------|------------------------------------------------|
+|VendorId    |`tcapi set GPON_ONU VendorId "HWTC"`            |
+|SerialNumber|`tcapi set GPON_ONU SerialNumber "HWTC286F3DB5"`|
+|EquipmentId |`tcapi set GPON_ONU EquipmentId "HG8145B7N"`    |
+|OMCCVersion |`tcapi set GPON_ONU OMCCVersion "160"`          |
+|LOID        |`tcapi set GPON_LOIDAuth LOID "8806480495"`     |
+|OLT VendorId|`tcapi set GPON_OLT VendorId "HWTC"`            |
+|WAN_MAC     |`tcapi set Mac WAN_MAC "E0:AE:A2:EF:B1:CD"`     |
+|Telnet      |`tcapi set TelnetEntry Active "Yes"`            |
+|TR069       |`tcapi set Cwmp Tr069Enable "0"`                |
+
+-----
+
+## One-liner (Copy ทั้งหมด)
+
+```bash
+tcapi set GPON_ONU VendorId "HWTC" && tcapi set GPON_ONU SerialNumber "HWTC286F3DB5" && tcapi set GPON_ONU EquipmentId "HG8145B7N" && tcapi set GPON_ONU OMCCVersion "160" && tcapi set GPON_LOIDAuth LOID "8806480495" && tcapi set GPON_OLT VendorId "HWTC" && tcapi set Mac WAN_MAC "E0:AE:A2:EF:B1:CD" && tcapi set Firewall wan_telnet_enable "1" && tcapi set TelnetEntry Active "Yes" && tcapi set TelnetEntry telnet_username "admin" && tcapi set TelnetEntry telnet_passwd "16122516" && tcapi set TelnetEntry telnet_port "23" && tcapi set Cwmp Tr069Enable "0" && tcapi set Cwmp periodActive "No" && tcapi set Cwmp Active "No" && tcapi save && reboot
+```
+
+-----
+
+ลองรันแล้วบอกผลด้วยครับ! 🤞​​​​​​​​​​​​​​​​
 
