@@ -97,4 +97,59 @@ telnet 192.168.1.1 23
 
 -----
 
-Flash แล้วบอกผลด้วยครับ! 🤞​​​​​​​​​​​​​​​​
+Flash แล้วบอกผลด้วย# พบคำสั่ง prolinecmd ทั้งหมดแล้ว!
+
+จากภาพเห็นคำสั่งที่สำคัญสำหรับ GPON Clone:
+
+## คำสั่งตั้งค่า GPON ทั้งหมด
+
+```bash
+# 1. ตั้ง Serial Number
+prolinecmd xponsn set HWTC286F3DB5
+
+# 2. ตั้ง Vendor ID
+prolinecmd VendorID set HWTC
+
+# 3. ตั้ง GPON Registration ID (PLOAM Password)
+prolinecmd GponRegId set 2150087381LDR7001564
+
+# 4. ตั้ง Hardware Version
+prolinecmd hwver set 39E7.A
+
+# 5. ตั้ง Product Class
+prolinecmd productclass set HG8145B7N
+
+# 6. ตั้ง Manufacturer OUI
+prolinecmd manufacturerOUI set HWTC
+```
+
+-----
+
+## หลังตั้งค่าเสร็จ
+
+```bash
+# Save
+prolinecmd save
+
+# หรือ
+cfgmgr save
+
+# Reboot
+reboot
+```
+
+-----
+
+## ตรวจสอบค่าที่ตั้ง
+
+```bash
+# ดูค่าปัจจุบัน
+prolinecmd xponsn get
+prolinecmd VendorID get
+prolinecmd GponRegId get
+```
+
+-----
+
+ลองตั้งค่าตามนี้แล้วบอกผลด้วยครับ! 🤞​​​​​​​​​​​​​​​​
+
