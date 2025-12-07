@@ -12,183 +12,176 @@
 | MAC Address | E0:AE:A2:EF:B1:CD |
 | Hardware Version | 39E7.A |
 | Software Version | V5R023C10S104 |
-| Manufacture Info | 2150087381LDR7001564.C402 |
 
 ---
 
-## วิธีที่ 1: ใช้คำสั่ง tcapi (แนะนำ)
+## คำสั่งที่ทดสอบแล้วว่าใช้งานได้จริง
+
+### Tools ที่ใช้ (อยู่ใน /userfs/bin/)
+
+| Tool | คำสั่ง | หน้าที่ |
+|------|--------|---------|
+| **ponmgr** | `ponmgr gpon set sn` | ตั้ง SN ได้ผลทันที |
+| **tcapi** | `tcapi set/get/commit/save` | ตั้งค่าและบันทึกถาวร |
+| **omcicfgCmd** | `omcicfgCmd get sn/loid` | ตรวจสอบค่า |
+
+---
+
+## วิธีที่ 1: คำสั่งที่ใช้งานได้จริง (ทดสอบแล้ว)
 
 ```bash
-# 1. ดูค่าปัจจุบันก่อน
-tcapi get GPON_Common GPON_SN
-tcapi get GPON_Common PON_MAC
-tcapi get GPON_Common VendorID
+# ===== ขั้นตอนที่ 1: ตั้ง GPON Serial Number =====
 
-# 2. ตั้งค่า GPON Serial Number
-tcapi set GPON_Common GPON_SN "HWTC286F3DB5"
-tcapi set Info_GPON GPON_SN "HWTC286F3DB5"
+# ผ่าน ponmgr (ได้ผลทันที)
+ponmgr gpon set sn HWTC 286f3db5
 
-# 3. ตั้งค่า PON MAC Address
-tcapi set GPON_Common PON_MAC "E0:AE:A2:EF:B1:CD"
-tcapi set Info_GPON PON_MAC "E0:AE:A2:EF:B1:CD"
+# ผ่าน tcapi (สำหรับบันทึกถาวร)
+tcapi set GPON_ONU SerialNumber "HWTC286F3DB5"
+tcapi set GPON_ONU VendorId "HWTC"
 
-# 4. ตั้งค่า Vendor ID (HWTC = Huawei)
-tcapi set GPON_Common VendorID "HWTC"
-tcapi set Info_GPON VendorID "HWTC"
+# ===== ขั้นตอนที่ 2: ตั้ง LOID =====
 
-# 5. ตั้งค่า Equipment ID
-tcapi set GPON_Common EquipmentID "HG8145B7N"
-tcapi set Info_GPON EquipmentID "HG8145B7N"
+tcapi set GPON_LOIDAuth LOID "8806480495"
+tcapi set GPON_LOIDAuth Password ""
 
-# 6. ตั้งค่า LOID
-tcapi set GPON_Common LOID "8806480495"
-tcapi set Info_GPON LOID "8806480495"
+# ===== ขั้นตอนที่ 3: บันทึกถาวร =====
 
-# 7. บันทึกการเปลี่ยนแปลง
-tcapi commit GPON_Common
-tcapi commit Info_GPON
+tcapi commit GPON_ONU
+tcapi commit GPON_LOIDAuth
 tcapi save
 
-# 8. Restart PON interface
-ifconfig pon down
-sleep 2
-ifconfig pon up
+# ===== ขั้นตอนที่ 4: ตรวจสอบ =====
 
-# 9. ตรวจสอบผลลัพธ์
-tcapi get GPON_Common GPON_SN
-tcapi get GPON_Common PON_MAC
-cat /proc/tc3162/pon_status
+omcicfgCmd get sn
+omcicfgCmd get loid
+ponmgr gpon get info
 ```
 
 ---
 
-## วิธีที่ 2: ใช้ gpon_clone script
+## วิธีที่ 2: ใช้ Script สำเร็จรูป
 
 ```bash
-# Clone ทั้งหมดพร้อม restart
-gpon_clone -s HWTC286F3DB5 \
-           -l 8806480495 \
-           -m E0:AE:A2:EF:B1:CD \
-           -v HWTC \
-           -e HG8145B7N \
-           -R
+# ดาวน์โหลดและรัน script
+/userfs/bin/clone_hg8145b7n.sh
 
-# ตรวจสอบค่าที่ตั้ง
-gpon_clone -c
-```
-
----
-
-## วิธีที่ 3: เขียนค่าผ่าน /proc โดยตรง
-
-```bash
-# เขียน GPON SN
-echo "HWTC286F3DB5" > /proc/tc3162/gpon_sn
-
-# เขียน PON MAC
-echo "E0:AE:A2:EF:B1:CD" > /proc/tc3162/pon_mac
-
-# ตรวจสอบ
-cat /proc/tc3162/gpon_sn
-cat /proc/tc3162/pon_mac
-```
-
----
-
-## Script สำเร็จรูป
-
-สร้างไฟล์ `/tmp/clone_hg8145b7n.sh`:
-
-```bash
+# หรือสร้างเอง:
+cat > /tmp/clone.sh << 'EOF'
 #!/bin/sh
-# Clone HG8145B7N to T626 Pro
-
-echo "=== Cloning HG8145B7N GPON Profile ==="
-
-# Set GPON SN
-tcapi set GPON_Common GPON_SN "HWTC286F3DB5"
-echo "[OK] GPON_SN = HWTC286F3DB5"
-
-# Set LOID
-tcapi set GPON_Common LOID "8806480495"
-echo "[OK] LOID = 8806480495"
-
-# Set MAC
-tcapi set GPON_Common PON_MAC "E0:AE:A2:EF:B1:CD"
-echo "[OK] PON_MAC = E0:AE:A2:EF:B1:CD"
-
-# Set Vendor ID
-tcapi set GPON_Common VendorID "HWTC"
-echo "[OK] VendorID = HWTC"
-
-# Set Equipment ID
-tcapi set GPON_Common EquipmentID "HG8145B7N"
-echo "[OK] EquipmentID = HG8145B7N"
-
-# Commit and save
-tcapi commit GPON_Common
+ponmgr gpon set sn HWTC 286f3db5
+tcapi set GPON_ONU SerialNumber "HWTC286F3DB5"
+tcapi set GPON_ONU VendorId "HWTC"
+tcapi set GPON_LOIDAuth LOID "8806480495"
+tcapi set GPON_LOIDAuth Password ""
+tcapi commit GPON_ONU
+tcapi commit GPON_LOIDAuth
 tcapi save
-echo "[OK] Settings saved"
-
-# Restart PON
-echo "Restarting PON interface..."
-ifconfig pon down && sleep 2 && ifconfig pon up
-echo "[OK] PON restarted"
-
-# Verify
-echo ""
-echo "=== Verification ==="
-tcapi get GPON_Common GPON_SN
-tcapi get GPON_Common PON_MAC
-tcapi get GPON_Common VendorID
-tcapi get GPON_Common EquipmentID
-
-echo ""
-echo "=== Clone Complete ==="
+echo "Done! Check: ponmgr gpon get info"
+EOF
+chmod +x /tmp/clone.sh
+/tmp/clone.sh
 ```
 
 ---
 
-## ตรวจสอบสถานะหลัง Clone
+## ตรวจสอบสถานะ
 
 ```bash
-# ตรวจสอบ PON Status
-cat /proc/tc3162/pon_status
+# ดู ONU info
+ponmgr gpon get info
 
-# ตรวจสอบ OMCI Status
-cat /proc/tc3162/omci_status
+# ดู SN และ LOID
+omcicfgCmd get sn
+omcicfgCmd get loid
 
-# ตรวจสอบ Registration
-tcapi get GPON_Common ONUState
+# ดู interface
+ifconfig pon
+ifconfig ppp0
 ```
 
-### สถานะ ONU ที่คาดหวัง
+### ผลลัพธ์ที่ถูกต้อง
+
+```
+ONU Info:
+ ONU ID:    1          <-- ต้องเป็น 1 (ไม่ใช่ 255)
+ ONU State: O5         <-- ต้องเป็น O5 (Operation)
+ SN:        HWTC286f3db5
+```
+
+---
+
+## สถานะ ONU
 
 | State | ความหมาย |
 |-------|----------|
-| O1 | Initial state |
+| O1 | Initial state (ยังไม่ลงทะเบียน) |
 | O2 | Standby state |
 | O3 | Serial number state |
 | O4 | Ranging state |
-| O5 | **Operation state** (ปกติ - ลงทะเบียนสำเร็จ) |
+| **O5** | **Operation state (ลงทะเบียนสำเร็จ!)** |
 | O6 | POPUP state |
 | O7 | Emergency stop |
 
 ---
 
-## หมายเหตุสำคัญ
+## Table Names ที่ถูกต้อง
 
-1. **LOID**: ค่า LOID ที่ใช้คือ `8806480495`
+| Table | ใช้สำหรับ |
+|-------|-----------|
+| `GPON_ONU` | SerialNumber, VendorId |
+| `GPON_LOIDAuth` | LOID, Password |
 
-2. **SN Format**:
-   - Hex: `48575443286F3DB5`
-   - ASCII: `HWTC286F3DB5` (ใช้แบบนี้)
+**หมายเหตุ**: `GPON_Common` และ `Info_GPON` ใช้ไม่ได้บน firmware นี้
 
-3. **ถ้าไม่ Online**: ตรวจสอบว่า OLT ของ AIS ต้องการ parameter อื่นเพิ่มเติมหรือไม่
+---
+
+## MAC Address
+
+MAC Address (`E0:AE:A2:EF:B1:CD`) จะถูกตั้งอัตโนมัติจาก hardware ของ T626 Pro
+ไม่ต้องตั้งค่าแยก - ระบบจะใช้ MAC ของ pon interface
+
+```bash
+# ดู MAC ปัจจุบัน
+ifconfig pon | grep HWaddr
+```
+
+---
+
+## Troubleshooting
+
+### ONU State ยังเป็น O1
+
+1. ตรวจสอบสาย fiber เสียบถูกต้อง
+2. ถอด ONU เดิม (HG8145B7N) ออกก่อน
+3. รอ 1-2 นาทีให้ OLT รู้จัก SN ใหม่
+4. ลอง `reboot`
+
+### ดู LOS Status
+
+```bash
+cat /proc/tc3162/los_status
+# 0 = มี signal, 1 = ไม่มี signal
+```
+
+---
+
+## สรุปคำสั่งสั้นๆ
+
+```bash
+# Clone แบบถาวร (ครบทุกขั้นตอน)
+ponmgr gpon set sn HWTC 286f3db5 && \
+tcapi set GPON_ONU SerialNumber "HWTC286F3DB5" && \
+tcapi set GPON_ONU VendorId "HWTC" && \
+tcapi set GPON_LOIDAuth LOID "8806480495" && \
+tcapi commit GPON_ONU && \
+tcapi commit GPON_LOIDAuth && \
+tcapi save && \
+ponmgr gpon get info
+```
 
 ---
 
 ## แหล่งข้อมูล
 
-- Config file: `/home/user/tclinux_T3_T626Pro_True/configs/gpon_clone_hg8145b7n.conf`
-- Clone script: `/home/user/tclinux_T3_T626Pro_True/hybrid_build/scripts/gpon_clone_ais.sh`
+- Config file: `configs/gpon_clone_hg8145b7n.conf`
+- Clone script: `scripts/clone_hg8145b7n.sh`
