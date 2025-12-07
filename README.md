@@ -28,6 +28,7 @@ sed -i 's/Tr069Enable="1"/Tr069Enable="0"/g' /tmp/ctromfile.cfg
 sed -i 's/periodActive="Yes"/periodActive="No"/g' /tmp/ctromfile.cfg
 sed -i 's/<Entry Active="Yes" periodInterval="3600"/<Entry Active="No" periodInterval="3600"/g' /tmp/ctromfile.cfg
 ```
+48575443286F3DB5
 
 # แก้ไข Telnet Entry และปิด TR069​​​​​​​​​​​​​​​​
 
